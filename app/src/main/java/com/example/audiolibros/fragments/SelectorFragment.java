@@ -6,9 +6,13 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -41,6 +45,11 @@ public class SelectorFragment extends Fragment {
 			contenedor, Bundle savedInstanceState) {
 		View vista = inflador.inflate(R.layout.fragment_selector,
 				contenedor, false);
+
+		//Con esta instrucción activamos la acción de añadir menús desde el fragment
+		//Hay que implementar los métodos de los menús
+		setHasOptionsMenu(true);
+
 		recyclerView = (RecyclerView) vista.findViewById(
 				R.id.recycler_view);
 		recyclerView.setLayoutManager(new GridLayoutManager(actividad,2));
@@ -70,12 +79,24 @@ public class SelectorFragment extends Fragment {
 								startActivity(Intent.createChooser(i, "Compartir"));
 								break;
 							case 1: //Borrar
-								listaLibros.remove(id);
-								adaptador.notifyDataSetChanged();
+								Snackbar.make(v,"¿Estás seguro?", Snackbar.LENGTH_LONG)
+									.setAction("SI", new View.OnClickListener() {
+										@Override
+										public void onClick(View view) {
+											listaLibros.remove(id);
+											adaptador.notifyDataSetChanged();
+										}
+									})
+									.show();
 								break;
 							case 2: //Insertar
 								listaLibros.add(listaLibros.get(id));
 								adaptador.notifyDataSetChanged();
+								Snackbar.make(v,"Libro insertado", Snackbar.LENGTH_INDEFINITE)
+									.setAction("OK", new View.OnClickListener() {
+										@Override public void onClick(View view) { }
+									})
+									.show();
 								break;
 						}
 					}
@@ -85,5 +106,23 @@ public class SelectorFragment extends Fragment {
 			}
 		});
 		return vista;
+
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.menu_selector, menu);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.menu_ultimo) {
+			((MainActivity) actividad).irUltimoVisitado();
+			return true;
+		} else if (id == R.id.menu_buscar) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }

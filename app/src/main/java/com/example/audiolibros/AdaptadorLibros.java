@@ -47,6 +47,7 @@ public class AdaptadorLibros extends RecyclerView.Adapter<AdaptadorLibros.ViewHo
 		View v = inflador.inflate(R.layout.elemento_selector, null);
 		v.setOnClickListener(onClickListener);
 		v.setOnLongClickListener(onLongClickListener);
+
 		return new ViewHolder(v);
 	}
 
