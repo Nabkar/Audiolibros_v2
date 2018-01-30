@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.audiolibros.AdaptadorLibros;
+import com.example.audiolibros.AdaptadorLibrosFiltro;
 import com.example.audiolibros.Aplicacion;
 import com.example.audiolibros.Libro;
 import com.example.audiolibros.MainActivity;
@@ -31,7 +32,7 @@ import java.util.List;
 public class SelectorFragment extends Fragment {
 	private Activity actividad;
 	private RecyclerView recyclerView;
-	private AdaptadorLibros adaptador;
+	private AdaptadorLibrosFiltro adaptador;
 	private List<Libro> listaLibros;
 
 	@Override public void onAttach(Activity actividad) {
@@ -57,8 +58,11 @@ public class SelectorFragment extends Fragment {
 		adaptador.setOnItemClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				/*((MainActivity) actividad).mostrarDetalle(
+						recyclerView.getChildAdapterPosition(v));*/
 				((MainActivity) actividad).mostrarDetalle(
-						recyclerView.getChildAdapterPosition(v));
+						(int) adaptador.getItemId(
+								recyclerView.getChildAdapterPosition(v)));
 			}
 		});
 
@@ -83,14 +87,17 @@ public class SelectorFragment extends Fragment {
 									.setAction("SI", new View.OnClickListener() {
 										@Override
 										public void onClick(View view) {
-											listaLibros.remove(id);
+											//listaLibros.remove(id);
+											adaptador.borrar(id);
 											adaptador.notifyDataSetChanged();
 										}
 									})
 									.show();
 								break;
 							case 2: //Insertar
-								listaLibros.add(listaLibros.get(id));
+								//listaLibros.add(listaLibros.get(id));
+								int posicion = recyclerView.getChildLayoutPosition(v);
+								adaptador.insertar((Libro) adaptador.getItem(posicion));
 								adaptador.notifyDataSetChanged();
 								Snackbar.make(v,"Libro insertado", Snackbar.LENGTH_INDEFINITE)
 									.setAction("OK", new View.OnClickListener() {
@@ -107,6 +114,10 @@ public class SelectorFragment extends Fragment {
 		});
 		return vista;
 
+	}
+	@Override public void onResume(){
+		((MainActivity) getActivity()).mostrarElementos(true);
+		super.onResume();
 	}
 
 	@Override

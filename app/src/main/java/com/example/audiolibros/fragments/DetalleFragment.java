@@ -13,8 +13,10 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.example.audiolibros.Aplicacion;
 import com.example.audiolibros.Libro;
+import com.example.audiolibros.MainActivity;
 import com.example.audiolibros.R;
 
 import java.io.IOException;
@@ -46,8 +48,9 @@ public class DetalleFragment extends Fragment implements
 		Libro libro = ((Aplicacion) getActivity().getApplication()).getListaLibros().get(id);
 		((TextView) vista.findViewById(R.id.titulo)).setText(libro.titulo);
 		((TextView) vista.findViewById(R.id.autor)).setText(libro.autor);
-		((ImageView) vista.findViewById(R.id.portada))
-				.setImageResource(libro.recursoImagen);
+		Aplicacion aplicacion = (Aplicacion) getActivity().getApplication();
+		((NetworkImageView) vista.findViewById(R.id.portada)).setImageUrl(
+				libro.urlImagen,aplicacion.getLectorImagenes());;
 		vista.setOnTouchListener(this);
 		if (mediaPlayer != null){
 			mediaPlayer.release();
@@ -63,6 +66,14 @@ public class DetalleFragment extends Fragment implements
 			Log.e("Audiolibros", "ERROR: No se puede reproducir "+audio,e);
 		}
 	}
+	@Override public void onResume(){
+		DetalleFragment detalleFragment = (DetalleFragment)
+				getFragmentManager().findFragmentById(R.id.detalle_fragment);
+		if (detalleFragment == null ) {
+			((MainActivity) getActivity()).mostrarElementos(false);
+		}
+		super.onResume();
+	}
 	public void ponInfoLibro(int id) {
 		ponInfoLibro(id, getView());
 	}
@@ -70,8 +81,8 @@ public class DetalleFragment extends Fragment implements
 		Log.d("Audiolibros", "Entramos en onPrepared de MediaPlayer");
 		mediaPlayer.start();
 		mediaController.setMediaPlayer(this);
-		mediaController.setAnchorView(getView().findViewById(
-				R.id.fragment_detalle));
+		mediaController.setAnchorView(getView().findViewById(R.id.fragment_detalle));
+		//mediaController.setPadding(0, 0, 0, 110);
 		mediaController.setEnabled(true);
 		mediaController.show();
 	}
@@ -89,6 +100,7 @@ public class DetalleFragment extends Fragment implements
 		}
 		super.onStop();
 	}
+
 	@Override public boolean canPause() {
 		return true;
 	}
