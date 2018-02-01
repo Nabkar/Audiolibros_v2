@@ -2,6 +2,7 @@ package com.example.audiolibros;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.audiolibros.fragments.DetalleFragment;
+import com.example.audiolibros.fragments.PreferenciasFragment;
 import com.example.audiolibros.fragments.SelectorFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -43,13 +45,17 @@ public class MainActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		if ((findViewById(R.id.contenedor_pequeno) != null) &&
+		/*if ((findViewById(R.id.contenedor_pequeno) != null) &&
 				(getFragmentManager().findFragmentById(
 						R.id.contenedor_pequeno) == null)){
 			SelectorFragment primerFragment = new SelectorFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.contenedor_pequeno, primerFragment).commit();
-		}
+		}*/
+		int idContenedor = (findViewById(R.id.contenedor_pequeno) != null) ?
+				R.id.contenedor_pequeno : R.id.contenedor_izquierdo;
+		SelectorFragment primerFragment = new SelectorFragment();
+		getFragmentManager().beginTransaction().add(idContenedor, primerFragment).commit();
 
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -168,7 +174,7 @@ public class MainActivity extends AppCompatActivity
 
 		//noinspection SimplifiableIfStatement
 		if (id == R.id.menu_preferencias) {
-			Toast.makeText(this, "Preferencias", Toast.LENGTH_LONG).show();
+			abrePreferencias();
 			return true;
 		} else if (id == R.id.menu_acerca) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -196,6 +202,9 @@ public class MainActivity extends AppCompatActivity
 		} else if (id == R.id.nav_suspense) {
 			adaptador.setGenero(Libro.G_SUSPENSE);
 			adaptador.notifyDataSetChanged();
+		} else if (id == R.id.nav_preferencias) {
+			Intent i = new Intent(this, PreferenciasActivity.class);
+			startActivity(i);
 		}
 		DrawerLayout drawer = (DrawerLayout) findViewById(
 				R.id.drawer_layout);
@@ -234,5 +243,15 @@ public class MainActivity extends AppCompatActivity
 			tabs.setVisibility(View.GONE);
 			drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 		}
+	}
+
+	public void abrePreferencias() {
+		int idContenedor = (findViewById(R.id.contenedor_pequeno) != null) ?
+				R.id.contenedor_pequeno : R.id.contenedor_izquierdo;
+		PreferenciasFragment prefFragment = new PreferenciasFragment();
+		getFragmentManager().beginTransaction()
+				.replace(idContenedor, prefFragment)
+				.addToBackStack(null)
+				.commit();
 	}
 }

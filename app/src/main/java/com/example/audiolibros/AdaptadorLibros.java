@@ -2,6 +2,7 @@ package com.example.audiolibros;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,12 +68,20 @@ public class AdaptadorLibros extends RecyclerView.Adapter<AdaptadorLibros.ViewHo
 				@Override public void onResponse(ImageLoader.ImageContainer
 														 response, boolean isImmediate) {
 					Bitmap bitmap = response.getBitmap();
-					holder.portada.setImageBitmap(bitmap);
+					if (bitmap != null) {
+						holder.portada.setImageBitmap(bitmap);
+						Palette palette = Palette.from(bitmap).generate();
+						holder.itemView.setBackgroundColor(palette.getLightMutedColor(0));
+						holder.titulo.setBackgroundColor(palette.getLightVibrantColor(0));
+						holder.portada.invalidate();
+					}
 				}
 				@Override public void onErrorResponse(VolleyError error) {
 					holder.portada.setImageResource(R.drawable.books);
 				}
 			});
+		holder.itemView.setScaleX(1);
+		holder.itemView.setScaleY(1);
 	}
 
 	// Indicamos el número de elementos de la lista
