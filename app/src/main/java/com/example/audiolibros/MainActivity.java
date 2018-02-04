@@ -2,14 +2,22 @@ package com.example.audiolibros;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -22,6 +30,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.example.audiolibros.fragments.DetalleFragment;
@@ -39,6 +48,14 @@ public class MainActivity extends AppCompatActivity
 	private TabLayout tabs;
 	private DrawerLayout drawer;
 	private ActionBarDrawerToggle toggle;
+
+
+	// Notificacion
+	private static final int ID_NOTIFICACION = 1;
+	static final String ID_CANAL = "channel_id";
+	private NotificationManager notificManager;
+	private NotificationCompat.Builder notificacion;
+	private RemoteViews remoteViews;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +151,46 @@ public class MainActivity extends AppCompatActivity
 		NavigationView navigationView = (NavigationView) findViewById(
 				R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
+
+		//Notificacion
+		SharedPreferences pref = getSharedPreferences(
+				"com.example.audiolibros_internal", MODE_PRIVATE);
+		int id = pref.getInt("ultimo", -1);
+		String titulo = null;
+		String autor = null;
+		if (id >= 0) {
+			titulo = app.getListaLibros().get(id).titulo;
+			autor = app.getListaLibros().get(id).autor;
+		} else {
+			titulo = "Título";
+			autor = "Autor";
+		}
+
+		remoteViews = new RemoteViews(getPackageName(), R.layout.notificacion);
+		remoteViews.setImageViewResource(R.id.reproducir, android.R.drawable.ic_media_play);
+		remoteViews.setImageViewResource(R.id.imagen, android.R.drawable.ic_menu_sort_by_size);
+		remoteViews.setTextViewText(R.id.titulo, titulo);
+		remoteViews.setTextColor(R.id.titulo, Color.WHITE);
+		remoteViews.setTextViewText(R.id.autor, autor);
+		remoteViews.setTextColor(R.id.autor, Color.WHITE);
+
+		Intent intent = new Intent(this, MainActivity.class);
+		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		notificacion = new NotificationCompat.Builder(this, ID_CANAL)
+				.setContent(remoteViews)
+				.setPriority(Notification.PRIORITY_MAX)
+				.setSmallIcon(R.mipmap.ic_launcher)
+				.setContentTitle("AudioLibros")
+				.setContentIntent(pendingIntent);
+		notificManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		if (Build.VERSION.SDK_INT >= 26){
+			NotificationChannel channel = new NotificationChannel(ID_CANAL,"Nombre del canal",
+					NotificationManager.IMPORTANCE_DEFAULT);
+			channel.setDescription("Descripción del canal");
+			notificManager.createNotificationChannel(channel);
+		}
+		notificManager.notify(ID_NOTIFICACION, notificacion.build());
 	}
 
 	public void mostrarDetalle(int id) {
